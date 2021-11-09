@@ -26,6 +26,7 @@ function parseArgumentsIntoOptions(rawArgs) {
     run_install: args["--install"],
     type_project: args["--type"],
     installer: args["--installer"],
+    purpose: args["--purpose"],
   };
 }
 
@@ -40,15 +41,6 @@ async function promptForMissingOptions(options) {
       default: "Typescript",
     });
   }
-  if (!options.type_project) {
-    questions.push({
-      type: "list",
-      name: "type_project",
-      message: "Please choose type project",
-      choices: ["Web", "Node"],
-      default: "Node",
-    });
-  }
   if (!options.docker_compose) {
     questions.push({
       type: "confirm",
@@ -59,6 +51,27 @@ async function promptForMissingOptions(options) {
   }
   let answers = await inquirer.prompt(questions);
 
+  if (!options.type_project) {
+    answers.type_project = (await inquirer.prompt([{
+      type: "list",
+      name: "type_project",
+      message: "Please choose type project",
+      choices: ["Web", "Node"],
+      default: "Node",
+    }])).type_project;
+
+    if(answers.type_project.toUpperCase() === "NODE"){      
+      answers.purpose = (await inquirer.prompt([{
+        type: "list",
+        name: "purpose",
+        message: "Finality?",
+        choices: ["default", "api"],
+        default: "default",
+      }])).purpose;
+    }else{
+        //web
+    }
+  }
   if (!options.run_install) {
     const answer = await inquirer.prompt([
       {
@@ -80,7 +93,7 @@ async function promptForMissingOptions(options) {
             default: "npm",
           },
         ])
-      ).installer
+      ).installer;
       answers.run_install = true;
     } else {
       answers.run_install = false;
@@ -151,6 +164,7 @@ async function promptForMissingOptions(options) {
     run_install: options.run_install || answers.run_install,
     type_project: options.type_project || answers.type_project,
     installer: options.installer || answers.installer,
+    purpose: options.purpose || answers.purpose,
   };
 }
 

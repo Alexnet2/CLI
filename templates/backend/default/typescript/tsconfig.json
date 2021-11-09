@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "strict": true,
+    "baseUrl": "./src",
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ],
+    "types": [
+      "./src/types",
+      "node",
+      "jest"
+    ],
+    "paths": {
+      "@utils": [
+        "utils/"
+      ],
+      "@database": [
+        "database/"
+      ],
+      "@config": [
+        "config/"
+      ],
+      "@controllers": [
+        "controllers/"
+      ],
+      "@exceptions": [
+        "exceptions/"
+      ]
+    },
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+  },
+  "exclude": ["*.js"]
+}

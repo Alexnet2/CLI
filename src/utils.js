@@ -100,9 +100,9 @@ async function copyTemplate(options) {
           return;
         }
         shell.exec(
-          `cp -r ${path.dirname(__dirname)}/templates/backend/typescript/* ./${
-            options.name
-          }`,
+          `cp -r ${path.dirname(__dirname)}/templates/backend/${
+            options.purpose
+          }/typescript/* ./${options.name}`,
           (err) => {
             if (err) {
               console.log(
