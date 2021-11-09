@@ -1,0 +1,1 @@
+export {default as ExampleException} from './ExampleException';

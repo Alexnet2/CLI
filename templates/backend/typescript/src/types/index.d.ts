@@ -1,0 +1,3 @@
+interface Exemple{
+    [key]:[type];
+}
