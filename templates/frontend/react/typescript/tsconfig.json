@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "jsx": "react",
+    "target": "es2017",
+    "lib": [
+      "DOM"
+    ],
+    "module": "commonjs",
+    "baseUrl": "typescript/app",
+    "paths": {
+      "@pages": [
+        "src/pages"
+      ],
+      "@hooks/*": [
+        "src/hooks/*"
+      ],
+      "@components": [
+        "src/pages/components"
+      ],
+      "@css/*": [
+        "src/assets/css/*"
+      ],
+      "@config": [
+        "src/config/"
+      ]
+    },
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "exclude": [
+    "build",
+    "webpack.config.dev.js",
+    "webpack.config.prod.js",
+    "webpack.config.vendor.js",
+  ]
+}

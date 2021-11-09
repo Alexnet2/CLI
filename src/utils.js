@@ -90,6 +90,30 @@ export default async (options) => {
 async function copyTemplate(options) {
   if (options.template.toUpperCase() === "TYPESCRIPT") {
     if (options.type_project.toUpperCase() === "WEB") {
+      mkdir(`./${options.name}`, (err) => {
+        if (err) {
+          console.log(
+            `Error to created directory => ${options.name}`,
+            chalk.red.bold("ERROR")
+          );
+          return;
+        }
+        shell.exec(
+          `cp -rT ${path.dirname(__dirname)}/templates/frontend/${
+            options.purpose.toLowerCase()
+          }/typescript ./${options.name}`,
+          (err) => {
+            if (err) {
+              console.log(
+                `Error to copied files in directory ${options.name}`,
+                chalk.red.bold("ERROR")
+              );
+              return;
+            }
+          }
+        );
+      });
+      console.log(chalk.green.bold("Template copied sucesseful!"));
     } else {
       mkdir(`./${options.name}`, (err) => {
         if (err) {
@@ -100,9 +124,9 @@ async function copyTemplate(options) {
           return;
         }
         shell.exec(
-          `cp -r ${path.dirname(__dirname)}/templates/backend/${
+          `cp -rT ${path.dirname(__dirname)}/templates/backend/${
             options.purpose
-          }/typescript/* ./${options.name}`,
+          }/typescript ./${options.name}`,
           (err) => {
             if (err) {
               console.log(

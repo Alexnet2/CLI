@@ -1,0 +1,3 @@
+// interface Example{
+//   [key]:[example]
+// }

@@ -52,24 +52,42 @@ async function promptForMissingOptions(options) {
   let answers = await inquirer.prompt(questions);
 
   if (!options.type_project) {
-    answers.type_project = (await inquirer.prompt([{
-      type: "list",
-      name: "type_project",
-      message: "Please choose type project",
-      choices: ["Web", "Node"],
-      default: "Node",
-    }])).type_project;
+    answers.type_project = (
+      await inquirer.prompt([
+        {
+          type: "list",
+          name: "type_project",
+          message: "Please choose type project",
+          choices: ["Web", "Node"],
+          default: "Node",
+        },
+      ])
+    ).type_project;
 
-    if(answers.type_project.toUpperCase() === "NODE"){      
-      answers.purpose = (await inquirer.prompt([{
-        type: "list",
-        name: "purpose",
-        message: "Finality?",
-        choices: ["default", "api"],
-        default: "default",
-      }])).purpose;
-    }else{
-        //web
+    if (answers.type_project.toUpperCase() === "NODE") {
+      answers.purpose = (
+        await inquirer.prompt([
+          {
+            type: "list",
+            name: "purpose",
+            message: "Finality?",
+            choices: ["default", "api"],
+            default: "default",
+          },
+        ])
+      ).purpose;
+    } else {
+      answers.purpose = (
+        await inquirer.prompt([
+          {
+            type: "list",
+            name: "purpose",
+            message: "Finality?",
+            choices: ["React"],
+            default: "React",
+          },
+        ])
+      ).purpose;
     }
   }
   if (!options.run_install) {

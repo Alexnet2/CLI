@@ -1,0 +1,35 @@
+{
+  "name": "react-custom",
+  "version": "1.0.0",
+  "description": "React Custom",
+  "scripts": {
+    "dev": "webpack --config webpack.config.vendor.js --progress && webpack server --config webpack.config.dev.js --progress"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "moment": "^2.29.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.34",
+    "@types/react-router-dom": "^5.3.2",
+    "@types/node": "^16.11.7",
+    "@types/react-dom": "^17.0.11",
+    "css-loader": "^6.5.1",
+    "dotenv": "^10.0.0",
+    "dotenv-webpack": "^7.0.3",
+    "html-webpack-plugin": "^5.5.0",
+    "node-sass": "^6.0.1",
+    "sass-loader": "^12.3.0",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.4.4",
+    "webpack": "^5.63.0",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.4.0"
+  }
+}
