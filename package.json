@@ -1,7 +1,7 @@
 {
   "name": "create-projects-cli",
   "description": "A CLI(Command Line Interface) to create projects",
-  "version": "1.0.1",
+  "version": "1.2.0",
   "bin": {
     "create-projects": "./bin/create-projects.js"
   },
@@ -13,6 +13,10 @@
     "cli",
     "generate projects"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Alexnet2/CLI.git"
+  },
   "license": "MIT",
   "author": {
     "email": "alex.oliveira@viannasempre.com.br",

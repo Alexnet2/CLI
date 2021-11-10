@@ -1,27 +1,23 @@
 import childProcess from "child_process";
 import chalk from "chalk";
-import { appendFile, existsSync, mkdir } from "fs";
+import { appendFile, appendFileSync, existsSync, mkdir } from "fs";
 import path from "path";
 import shell from "child_process";
 const Spinner = require("cli-spinner").Spinner;
 
 export async function initDockerCompose(options) {
   if (options.docker_compose) {
-    if (existsSync(`./${options.name}/docker-compose.yml`)) {
-      console.error(chalk.red(`exists file docker-compose.yml in directory`));
-      return;
-    }
     const template = `
     version: "3.7"
     services:
-    [name-service]:
-    image: [image-name]
+    [name_service]:
+    image: [image_name]
     command: sh -c "[command]"
     ports:
-      - [PORT DOCKER]:[PORT HOST]
+      - [PORT_DOCKER]:[PORT_HOST]
     working_dir: [directory where the project is]
     volumes:
-      - [VOLUME DOCKER]:[VOLUME HOST]
+      - [VOLUME_DOCKER]:[VOLUME_HOST]
     `;
     appendFile(`./${options.name}/docker-compose.yml`, template, (err) => {
       if (err) {
@@ -31,7 +27,7 @@ export async function initDockerCompose(options) {
     });
 
     console.log(
-      chalk.green.bold("Arquivo docker-compose.yml criado com sucesso!")
+      chalk.green.bold("docker-compose.yml file created successfully!")
     );
   }
 }
@@ -45,23 +41,36 @@ export async function initGit(options) {
     childProcess.exec(`cd ./${options.name} && git init`, (err) => {
       if (err) {
         console.log(
-          "Houve um erro ao inicializar um repositório GIT",
+          "There was an error initialize a repository GIT",
           chalk.red.bold("ERROR")
         );
         return;
       }
     });
-    console.log(chalk.green.bold("Repositório GIT inicializado com sucesso!"));
+    console.log(
+      chalk.green.bold("Repository GIT initialize with successfully!")
+    );
   }
 }
 
 export async function installDenpendencies(options) {
   if (options.run_install) {
-    const spinner = new Spinner("Installing dependencies....%s");
+    let i = 0;
+    while (i < Array.from(options.type_projects).length) {
+      const type = options.type_projects[i].toLowerCase();
+      await execInstall(type, options);
+      i++;
+    }
+  }
+}
+
+async function execInstall(type, options) {
+  return new Promise((resolve) => {
+    const spinner = new Spinner(`Installing dependencies on ${type}....%s`);
     spinner.setSpinnerString("|/-\\");
     spinner.start();
     childProcess.exec(
-      `cd ./${options.name} && ${options.installer} install`,
+      `cd ./${options.name}/${type} && ${options.installer} install`,
       (err) => {
         if (err) {
           spinner.stop();
@@ -73,13 +82,15 @@ export async function installDenpendencies(options) {
         }
         spinner.stop();
         console.log(
-          `\n${chalk.green.bold("Dependencies installed with sucesso!")}`
+          `\n${chalk.green.bold(
+            `Dependencies installed with success on ${type}!`
+          )}`
         );
+        return resolve(true);
       }
     );
-  }
+  });
 }
-
 export default async (options) => {
   await copyTemplate(options);
   await initGit(options);
@@ -88,8 +99,8 @@ export default async (options) => {
 };
 
 async function copyTemplate(options) {
-  if (options.template.toUpperCase() === "TYPESCRIPT") {
-    if (options.type_project.toUpperCase() === "WEB") {
+  Array.from(options.type_projects).forEach((type) => {
+    if (!existsSync(`./${options.name}`)) {
       mkdir(`./${options.name}`, (err) => {
         if (err) {
           console.log(
@@ -98,48 +109,41 @@ async function copyTemplate(options) {
           );
           return;
         }
-        shell.exec(
-          `cp -rT ${path.dirname(__dirname)}/templates/frontend/${
-            options.purpose.toLowerCase()
-          }/typescript ./${options.name}`,
-          (err) => {
-            if (err) {
-              console.log(
-                `Error to copied files in directory ${options.name}`,
-                chalk.red.bold("ERROR")
-              );
-              return;
-            }
-          }
-        );
       });
-      console.log(chalk.green.bold("Template copied sucesseful!"));
-    } else {
-      mkdir(`./${options.name}`, (err) => {
-        if (err) {
-          console.log(
-            `Error to created directory => ${options.name}`,
-            chalk.red.bold("ERROR")
-          );
-          return;
-        }
-        shell.exec(
-          `cp -rT ${path.dirname(__dirname)}/templates/backend/${
-            options.purpose
-          }/typescript ./${options.name}`,
-          (err) => {
-            if (err) {
-              console.log(
-                `Error to copied files in directory ${options.name}`,
-                chalk.red.bold("ERROR")
-              );
-              return;
-            }
-          }
-        );
-      });
-      console.log(chalk.green.bold("Template copied sucesseful!"));
     }
-  } else {
-  }
+    Array.from(options.purposes).forEach((purpose) => {
+      if (
+        existsSync(
+          `${path.dirname(__dirname)}/templates/${
+            type.toLowerCase() === "web" ? "frontend" : type.toLowerCase()
+          }/${purpose.toLowerCase()}/${options.template.toLowerCase()}`
+        )
+      ) {
+        shell.exec(
+          `cp -rT ${path.dirname(__dirname)}/templates/${
+            type.toLowerCase() === "web" ? "frontend" : type.toLowerCase()
+          }/${purpose.toLowerCase()}/${options.template.toLowerCase()} ./${
+            options.name
+          }/${type.toLowerCase()}`,
+          (err) => {
+            if (err) {
+              console.log(
+                `Error to copied files in directory ${options.name}`,
+                chalk.red.bold("ERROR")
+              );
+              return;
+            }
+
+            if (options.git) {
+              appendFileSync(
+                `./${options.name}/${type.toLowerCase()}/.gitignore`,
+                `node_modules\nyarn*\n`
+              );
+            }
+          }
+        );
+      }
+    });
+  });
+  console.log(chalk.green.bold("Template copied successfully!"));
 }

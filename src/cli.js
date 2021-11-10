@@ -6,28 +6,38 @@ import figlet from "figlet";
 import utils from "./utils";
 
 function parseArgumentsIntoOptions(rawArgs) {
-  const args = arg(
-    {
-      "--git": Boolean,
-      "--docker-compose": Boolean,
-      "--install": Boolean,
-      "--template": String,
-      "--type": String,
-    },
-    {
-      argv: rawArgs.slice(2),
+  try {
+    const args = arg(
+      {
+        "--git": Boolean,
+        "--template": String,
+        "--types": String,
+        "--purposes": String,
+        "--help": Boolean,
+      },
+      {
+        argv: rawArgs.slice(2),
+      }
+    );
+    return {
+      git: args["--git"],
+      template: args["--template"] || "",
+      name: args._[0],
+      type_projects: args["--types"],
+      purposes: args["--purposes"],
+      help: args["--help"] || false,
+    };
+  } catch (err) {
+    if (String(err).includes("requires")) {
+      console.log(chalk.red("Option requires argument"));
+    } else {
+      console.log(chalk.red("Option not found"));
     }
-  );
-  return {
-    git: args["--git"],
-    docker_compose: args["--docker-compose"],
-    template: args["--template"] || "",
-    name: args._[0],
-    run_install: args["--install"],
-    type_project: args["--type"],
-    installer: args["--installer"],
-    purpose: args["--purpose"],
-  };
+    return {
+      help: true,
+      err: true,
+    };
+  }
 }
 
 async function promptForMissingOptions(options) {
@@ -51,44 +61,52 @@ async function promptForMissingOptions(options) {
   }
   let answers = await inquirer.prompt(questions);
 
-  if (!options.type_project) {
-    answers.type_project = (
+  if (!options.type_projects) {
+    answers.type_projects = (
       await inquirer.prompt([
         {
-          type: "list",
-          name: "type_project",
+          type: "checkbox",
+          name: "type_projects",
           message: "Please choose type project",
-          choices: ["Web", "Node"],
-          default: "Node",
+          choices: ["Web", "Backend"],
+          default: "Backend",
+          validate: function (value) {
+            if (value.length) {
+              return true;
+            } else {
+              return "You must choose at least one.";
+            }
+          },
         },
       ])
-    ).type_project;
+    ).type_projects;
 
-    if (answers.type_project.toUpperCase() === "NODE") {
-      answers.purpose = (
-        await inquirer.prompt([
-          {
-            type: "list",
-            name: "purpose",
-            message: "Finality?",
-            choices: ["default", "api"],
-            default: "default",
-          },
-        ])
-      ).purpose;
-    } else {
-      answers.purpose = (
-        await inquirer.prompt([
-          {
-            type: "list",
-            name: "purpose",
-            message: "Finality?",
-            choices: ["React"],
-            default: "React",
-          },
-        ])
-      ).purpose;
+    let askPurpose = [];
+
+    if (Array.from(answers.type_projects).includes("Web")) {
+      askPurpose.push({
+        type: "list",
+        name: "purpose_web",
+        message: "Web - Finality?",
+        choices: ["React"],
+        default: "React",
+      });
     }
+    if (Array.from(answers.type_projects).includes("Backend")) {
+      askPurpose.push({
+        type: "list",
+        name: "purpose_node",
+        message: "Backend - Finality?",
+        choices: ["default", "api-express"],
+        default: "default",
+      });
+    }
+    answers.purposes = [];
+
+    const answersPurpose = await inquirer.prompt(askPurpose);
+    Object.keys(answersPurpose).forEach((key) => {
+      answers.purposes.push(answersPurpose[key]);
+    });
   }
   if (!options.run_install) {
     const answer = await inquirer.prompt([
@@ -180,9 +198,9 @@ async function promptForMissingOptions(options) {
     git: options.git || answers.git,
     docker_compose: options.docker_compose || answers.docker_compose,
     run_install: options.run_install || answers.run_install,
-    type_project: options.type_project || answers.type_project,
+    type_projects: options.type_projects || answers.type_projects,
     installer: options.installer || answers.installer,
-    purpose: options.purpose || answers.purpose,
+    purposes: options.purposes || answers.purposes,
   };
 }
 
@@ -199,11 +217,72 @@ export async function cli(args) {
     )
   );
   let options = parseArgumentsIntoOptions(args);
-  if (!options.name) {
+  if (options.help) {
+    console.log(
+      chalk.red(
+        "Create Projects developmented By Alex - GitHub https://github.com/Alexnet2/CLI"
+      )
+    );
+
+    console.log(chalk.green("Options:"));
+    console.log(
+      chalk.green(` --git`) + chalk.gray(` initialize a repository GIT`)
+    );
+    console.log(
+      chalk.green(` --template`) +
+        chalk.gray(` choose between Javascript and Typescript`)
+    );
+    console.log(
+      chalk.green(` --types`) +
+        chalk.gray(` what type your project will be focused on, web/backend.`) +
+        chalk.red("can choose both")
+    );
+    console.log(
+      chalk.green(`         Example: `) + chalk.gray(` --types=web,backend`)
+    );
+
+    console.log(
+      chalk.green(` --purposes`) +
+        chalk.gray(` what purpose your project will be focused on: `)
+    );
+    console.log(
+      chalk.gray(`       Web:
+        - React
+       Backend:
+        - default
+        - api-express`)
+    );
+    console.log(
+      chalk.green(`  Example: `) + chalk.gray(`--purposes=react,api-express`)
+    );
+    console.log(chalk.green(` --help`) + chalk.gray(" show help"));
+    return;
+  }
+  if (!options.name && !options.err) {
     console.error(
       chalk.red.bold("create-projects myproject => To created the project")
     );
     return;
+  }
+  if (options.purposes && (!options.type_projects || !options.template)) {
+    console.error(
+      chalk.red.bold(
+        "You need selected a template and type of project before continuos"
+      )
+    );
+    return;
+  } else if (options.type_projects && !options.template) {
+    console.error(
+      chalk.red.bold("You need selected a template before continuos")
+    );
+    return;
+  } else {
+    if(options.purposes){
+      options.purposes = options.purposes.split(",");
+    }
+    if(options.type_projects){
+      options.type_projects = options.type_projects.split(",");
+    }
   }
   options = await promptForMissingOptions(options);
   await utils(options);
