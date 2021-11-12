@@ -1,0 +1,51 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonJS",
+    "lib": [],
+    "strict": true,
+    "baseUrl": "./src",
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ],
+    "types": [
+      "./src/types",
+      "node",
+      "jest"
+    ],
+    "paths": {
+      "@utils": [
+        "utils/"
+      ],
+      "@config": [
+        "config/"
+      ],
+      "@middlewares": [
+        "middlewares/"
+      ],
+      "@exceptions": [
+        "exceptions/"
+      ],
+      "@repository": [
+        "database/repository"
+      ],
+      "@connection": [
+        "database/connection"
+      ],
+      "@entity": [
+        "database/entity"
+      ]
+    },
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames":true,
+    "strictPropertyInitialization": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
+  },
+  "exclude": [
+    "*.js",
+    "node_modules"
+  ],
+}

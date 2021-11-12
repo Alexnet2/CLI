@@ -17,6 +17,8 @@ create-projects myapp
         - Api - Express
         - default
     Example: --purposes=react,api-express
+--connection => Wich type connection you desire, Knex/TypeOrm.
+--plugin => Wich database use will,postgresql/mysql. 
 ```
 ## Description
 
@@ -30,8 +32,10 @@ create-projects myapp
     - Default
 
 ### Connection with database availables:
- - Knex => Builder Queries/SQL - using **pg** as a plugin
-
+ - Knex => Builder Queries/SQL
+ - TypeOrm => Object Relational Mapping
+   
+#### Plugins: Postgresql,Mysql
 ****
 
 ## Conclusion

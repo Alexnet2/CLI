@@ -1,6 +1,14 @@
 import childProcess from "child_process";
 import chalk from "chalk";
-import { appendFile, appendFileSync, existsSync, mkdir } from "fs";
+import {
+  appendFile,
+  appendFileSync,
+  existsSync,
+  mkdir,
+  readFileSync,
+  writeFile,
+  writeFileSync,
+} from "fs";
 import path from "path";
 import shell from "child_process";
 const Spinner = require("cli-spinner").Spinner;
@@ -116,13 +124,13 @@ async function copyTemplate(options) {
         existsSync(
           `${path.dirname(__dirname)}/templates/${
             type.toLowerCase() === "web" ? "frontend" : type.toLowerCase()
-          }/${purpose.toLowerCase()}/${options.template.toLowerCase()}`
+          }/${options.template.toLowerCase()}/${purpose.toLowerCase()}`
         )
       ) {
         shell.exec(
           `cp -rT ${path.dirname(__dirname)}/templates/${
             type.toLowerCase() === "web" ? "frontend" : type.toLowerCase()
-          }/${purpose.toLowerCase()}/${options.template.toLowerCase()} ./${
+          }/${options.template.toLowerCase()}/${purpose.toLowerCase()} ./${
             options.name
           }/${type.toLowerCase()}`,
           (err) => {
@@ -137,7 +145,94 @@ async function copyTemplate(options) {
             if (options.git) {
               appendFileSync(
                 `./${options.name}/${type.toLowerCase()}/.gitignore`,
-                `node_modules\nyarn*\n`
+                `node_modules\nyarn*\n.env\n`
+              );
+            }
+
+            if (type.toLowerCase() === "backend") {
+              const package_json = JSON.parse(
+                readFileSync(
+                  `${path.dirname(
+                    __dirname
+                  )}/templates/${type.toLowerCase()}/${options.template.toLowerCase()}/package.default.json`,
+                  "ascii"
+                )
+              );
+
+              if (type.toLowerCase() === "backend") {
+                if (validationPurpose(purpose.toLowerCase())) {
+                  package_json.dependencies.express = "*";
+                  package_json.dependencies.cors = "^2.8.5";
+                  package_json.devDependencies["@types/cors"] = "^2.8.12";
+                  package_json.devDependencies["@types/express"] = "^4.17.13";
+                }
+
+                shell.exec(
+                  `cp -rT ${path.dirname(
+                    __dirname
+                  )}/templates/${type.toLowerCase()}/${options.template.toLowerCase()}/databases/${options.type_connection.toLowerCase()} ./${
+                    options.name
+                  }/backend/src/database`,
+                  (err) => {
+                    if (err) {
+                      chalk.red.bold(
+                        "There was an error in write database files"
+                      );
+                    }
+                  }
+                );
+
+                shell.exec(
+                  `cp -rT ${path.dirname(
+                    __dirname
+                  )}/templates/${type.toLowerCase()}/${options.template.toLowerCase()}/setupFiles/${options.type_connection.toLowerCase()}/ ./${
+                    options.name
+                  }/backend`,
+                  (err) => {
+                    if (err) {
+                      chalk.red.bold("There was an error in write setup files");
+                    }
+                  }
+                );
+
+                if (options.type_connection.toLowerCase() === "knex") {
+                  package_json.dependencies.knex = "*";
+                  shell.exec(
+                    `sed -i "s/PLUGIN_DB_CLIENT/'${getPluginKnex(
+                      options.plugin_database.toLowerCase()
+                    )}'/g" ./${options.name}/backend/src/database/connection.ts
+                  `,
+                    (err) => {
+                      if (err) {
+                        chalk.red.bold("There was an error changed the files");
+                      }
+                    }
+                  );
+                } else if (
+                  options.type_connection.toLowerCase() === "typeorm"
+                ) {
+                  package_json.dependencies.typeorm = "^0.2.39";
+                  shell.exec(
+                    `sed -i "s/PLUGIN_DB_CLIENT/'${getPluginTypeorm(
+                      options.plugin_database.toLowerCase()
+                    )}'/g" ./${options.name}/backend/src/database/connection.ts
+                  `,
+                    (err) => {
+                      if (err) {
+                        chalk.red.bold("There was an error changed the files");
+                      }
+                    }
+                  );
+                }
+
+                package_json.dependencies[
+                  getPluginKnex(options.plugin_database.toLowerCase())
+                ] = "*";
+              }
+
+              writeFileSync(
+                `./${options.name}/backend/package.json`,
+                JSON.stringify(package_json)
               );
             }
           }
@@ -146,4 +241,36 @@ async function copyTemplate(options) {
     });
   });
   console.log(chalk.green.bold("Template copied successfully!"));
+}
+
+function validationPurpose(purpose) {
+  switch (purpose) {
+    case "api-express":
+      return true;
+      break;
+    default:
+      return false;
+  }
+}
+
+function getPluginKnex(plugin_database) {
+  switch (plugin_database) {
+    case "postgresql":
+      return "pg";
+      break;
+    case "mysql":
+      return "mysql";
+      break;
+  }
+}
+
+function getPluginTypeorm(plugin_database) {
+  switch (plugin_database) {
+    case "Postgresql":
+      return "postgres";
+      break;
+    case "Mysql":
+      return "mysql";
+      break;
+  }
 }

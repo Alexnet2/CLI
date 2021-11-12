@@ -14,6 +14,8 @@ function parseArgumentsIntoOptions(rawArgs) {
         "--types": String,
         "--purposes": String,
         "--help": Boolean,
+        "--connection": String,
+        "--plugin": String,
       },
       {
         argv: rawArgs.slice(2),
@@ -26,6 +28,8 @@ function parseArgumentsIntoOptions(rawArgs) {
       type_projects: args["--types"],
       purposes: args["--purposes"],
       help: args["--help"] || false,
+      type_connection: args["--connection"],
+      plugin_database: args["--plugin"],
     };
   } catch (err) {
     if (String(err).includes("requires")) {
@@ -59,6 +63,7 @@ async function promptForMissingOptions(options) {
       default: false,
     });
   }
+
   let answers = await inquirer.prompt(questions);
 
   if (!options.type_projects) {
@@ -109,15 +114,33 @@ async function promptForMissingOptions(options) {
     });
   }
   if (!options.run_install) {
-    const answer = await inquirer.prompt([
-      {
-        type: "confirm",
-        name: "run_install",
-        message: "Install Denpendencies?",
-        default: false,
-      },
-    ]);
+    const questions = [];
+    if (!options.type_connection) {
+      questions.push({
+        type: "list",
+        name: "type_connection",
+        message: "Please choose wich type connection your desire?",
+        choices: ["Knex", "TypeOrm"],
+        default: ["Knex"],
+      });
+    }
+    if (!options.plugin_database) {
+      questions.push({
+        type: "list",
+        name: "plugin_database",
+        message: "Please choose which plugin you will use?",
+        choices: ["Postgresql", "Mysql"],
+        default: "Postgresql",
+      });
+    }
+    questions.push({
+      type: "confirm",
+      name: "run_install",
+      message: "Install Denpendencies?",
+      default: false,
+    });
 
+    const answer = await inquirer.prompt(questions);
     if (answer.run_install) {
       answers.installer = (
         await inquirer.prompt([
@@ -134,6 +157,9 @@ async function promptForMissingOptions(options) {
     } else {
       answers.run_install = false;
     }
+
+    answers.type_connection = answer.type_connection;
+    answers.plugin_database = answer.plugin_database;
   }
 
   if (!options.git) {
@@ -201,6 +227,8 @@ async function promptForMissingOptions(options) {
     type_projects: options.type_projects || answers.type_projects,
     installer: options.installer || answers.installer,
     purposes: options.purposes || answers.purposes,
+    type_connection: options.type_connection || answers.type_connection,
+    plugin_database: options.plugin_database || answers.plugin_database,
   };
 }
 
@@ -256,6 +284,19 @@ export async function cli(args) {
       chalk.green(`  Example: `) + chalk.gray(`--purposes=react,api-express`)
     );
     console.log(chalk.green(` --help`) + chalk.gray(" show help"));
+    console.log(
+      chalk.green(` --connection`) +
+        chalk.gray(` Wich type of connection use will: Knex/TypeOrm.`)
+    );
+    console.log(
+      chalk.green(`         Example: `) + chalk.gray(` --connection=knex`)
+    );
+    console.log(
+      chalk.green(` --plugin`) + chalk.gray(` Wich database: Postgresql/Mysql.`)
+    );
+    console.log(
+      chalk.green(`         Example: `) + chalk.gray(` --plugin=postgresql`)
+    );
     return;
   }
   if (!options.name && !options.err) {
@@ -277,13 +318,15 @@ export async function cli(args) {
     );
     return;
   } else {
-    if(options.purposes){
+    if (options.purposes) {
       options.purposes = options.purposes.split(",");
     }
-    if(options.type_projects){
+    if (options.type_projects) {
       options.type_projects = options.type_projects.split(",");
     }
   }
+
+  console.log(options);
   options = await promptForMissingOptions(options);
   await utils(options);
 }

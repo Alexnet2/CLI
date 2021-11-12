@@ -6,7 +6,7 @@
       "DOM"
     ],
     "module": "commonjs",
-    "baseUrl": "typescript/app",
+    "baseUrl": "app",
     "paths": {
       "@pages": [
         "src/pages"
