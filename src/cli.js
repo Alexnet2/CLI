@@ -51,7 +51,7 @@ async function promptForMissingOptions(options) {
       type: "list",
       name: "template",
       message: "Please choose which Template",
-      choices: ["Javascript", "Typescript"],
+      choices: ["Typescript"],
       default: "Typescript",
     });
   }
@@ -258,7 +258,7 @@ export async function cli(args) {
     );
     console.log(
       chalk.green(` --template`) +
-        chalk.gray(` choose between Javascript and Typescript`)
+        chalk.gray(` Typescript`)
     );
     console.log(
       chalk.green(` --types`) +

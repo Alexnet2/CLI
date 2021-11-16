@@ -194,8 +194,6 @@ async function copyTemplate(options) {
                     }
                   }
                 );
-
-                console.log(purpose);
                 if (purpose.toLowerCase() === "api-graphql") {
                   shell.exec(
                     `cp -rT ${path.dirname(
@@ -240,6 +238,10 @@ async function copyTemplate(options) {
                       }
                     }
                   );
+                  appendFileSync(
+                    `./${options.name}/backend/README.md`,
+                    `\n[Knex](https://knexjs.org)<br/>`
+                  );
                 } else if (
                   options.type_connection.toLowerCase() === "typeorm"
                 ) {
@@ -260,6 +262,11 @@ async function copyTemplate(options) {
                 package_json.dependencies[
                   getPluginKnex(options.plugin_database.toLowerCase())
                 ] = "*";
+
+                appendFileSync(
+                  `./${options.name}/backend/README.md`,
+                  `\n[TypeOrm](https://typeorm.io/#/)<br/>`
+                );
               }
 
               writeFileSync(
