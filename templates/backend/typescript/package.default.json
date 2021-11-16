@@ -1,11 +1,16 @@
 {
-  "name": "api",
-  "description": "Template Typescript - API",
+  "name": "api_express",
+  "description": "Template Typescript - API EXPRESS",
   "scripts": {
     "dev": "ts-node-dev -r tsconfig-paths/register index.ts",
     "build": "webpack --progress",
     "start": "nodemon build/main.js",
     "test": "jest"
+  },
+  "author": {
+    "email": "alex.oliveira@viannasempre.com.br",
+    "name": "Alex Sandro Mateus de Oliveira",
+    "url": "https://github.com/Alexnet2"
   },
   "dependencies": {
     "moment": "^2.29.1",

@@ -15,6 +15,7 @@ create-projects myapp
         - React
       Backend:
         - Api - Express
+        - Api - Graphql
         - default
     Example: --purposes=react,api-express
 --connection => Wich type connection you desire, Knex/TypeOrm.
@@ -29,6 +30,7 @@ create-projects myapp
     - React
   * **Backend**
     - Api - Express
+    - Api - Graphql
     - Default
 
 ### Connection with database availables:

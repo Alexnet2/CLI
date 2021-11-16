@@ -150,14 +150,27 @@ async function copyTemplate(options) {
             }
 
             if (type.toLowerCase() === "backend") {
-              const package_json = JSON.parse(
-                readFileSync(
-                  `${path.dirname(
-                    __dirname
-                  )}/templates/${type.toLowerCase()}/${options.template.toLowerCase()}/package.default.json`,
-                  "ascii"
-                )
-              );
+              let package_json = "";
+
+              if (purpose.toLowerCase() !== "api-graphql") {
+                package_json = JSON.parse(
+                  readFileSync(
+                    `${path.dirname(
+                      __dirname
+                    )}/templates/${type.toLowerCase()}/${options.template.toLowerCase()}/package.default.json`,
+                    "ascii"
+                  )
+                );
+              } else {
+                package_json = JSON.parse(
+                  readFileSync(
+                    `${path.dirname(
+                      __dirname
+                    )}/templates/${type.toLowerCase()}/${options.template.toLowerCase()}/${purpose.toLowerCase()}/package.json`,
+                    "ascii"
+                  )
+                );
+              }
 
               if (type.toLowerCase() === "backend") {
                 if (validationPurpose(purpose.toLowerCase())) {
@@ -182,19 +195,38 @@ async function copyTemplate(options) {
                   }
                 );
 
-                shell.exec(
-                  `cp -rT ${path.dirname(
-                    __dirname
-                  )}/templates/${type.toLowerCase()}/${options.template.toLowerCase()}/setupFiles/${options.type_connection.toLowerCase()}/ ./${
-                    options.name
-                  }/backend`,
-                  (err) => {
-                    if (err) {
-                      chalk.red.bold("There was an error in write setup files");
+                console.log(purpose);
+                if (purpose.toLowerCase() === "api-graphql") {
+                  shell.exec(
+                    `cp -rT ${path.dirname(
+                      __dirname
+                    )}/templates/${type.toLowerCase()}/${options.template.toLowerCase()}/setupFiles/${options.type_connection.toLowerCase()}/index.ts ./${
+                      options.name
+                    }/backend`,
+                    (err) => {
+                      if (err) {
+                        chalk.red.bold(
+                          "There was an error in write setup files"
+                        );
+                      }
                     }
-                  }
-                );
-
+                  );
+                } else {
+                  shell.exec(
+                    `cp -rT ${path.dirname(
+                      __dirname
+                    )}/templates/${type.toLowerCase()}/${options.template.toLowerCase()}/setupFiles/${options.type_connection.toLowerCase()}/ ./${
+                      options.name
+                    }/backend`,
+                    (err) => {
+                      if (err) {
+                        chalk.red.bold(
+                          "There was an error in write setup files"
+                        );
+                      }
+                    }
+                  );
+                }
                 if (options.type_connection.toLowerCase() === "knex") {
                   package_json.dependencies.knex = "*";
                   shell.exec(
@@ -266,10 +298,10 @@ function getPluginKnex(plugin_database) {
 
 function getPluginTypeorm(plugin_database) {
   switch (plugin_database) {
-    case "Postgresql":
+    case "postgresql":
       return "postgres";
       break;
-    case "Mysql":
+    case "mysql":
       return "mysql";
       break;
   }

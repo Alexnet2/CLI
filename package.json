@@ -1,7 +1,7 @@
 {
   "name": "create-projects-cli",
   "description": "A CLI(Command Line Interface) to create projects",
-  "version": "1.2.0",
+  "version": "2.1.0",
   "bin": {
     "create-projects": "./bin/create-projects.js"
   },

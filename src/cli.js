@@ -102,7 +102,7 @@ async function promptForMissingOptions(options) {
         type: "list",
         name: "purpose_node",
         message: "Backend - Finality?",
-        choices: ["default", "api-express"],
+        choices: ["default", "api-express","api-graphql"],
         default: "default",
       });
     }
@@ -278,7 +278,8 @@ export async function cli(args) {
         - React
        Backend:
         - default
-        - api-express`)
+        - api-express
+        - api-graphql`)
     );
     console.log(
       chalk.green(`  Example: `) + chalk.gray(`--purposes=react,api-express`)
@@ -326,7 +327,6 @@ export async function cli(args) {
     }
   }
 
-  console.log(options);
   options = await promptForMissingOptions(options);
   await utils(options);
 }
