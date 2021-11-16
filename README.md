@@ -1,4 +1,4 @@
-## Project development for creating  projects agile 
+## Project development for creation  projects agile 
 ### Start
 ````
 create-projects myapp
